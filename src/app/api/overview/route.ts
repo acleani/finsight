@@ -47,6 +47,7 @@ export type OverviewRow = {
   company: {
     symbol: string; name: string; exchange: string; country: string;
     currency: string; sector: string; industry: string; themes: string[];
+    domain?: string; etoroSlug?: string;
   };
   quote: { price: number; change: number; changePct: number } | null;
   dividendYield: number | null;

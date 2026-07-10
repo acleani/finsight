@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import CompanyLogo from "@/components/CompanyLogo";
 import PriceChart from "@/components/PriceChart";
+import TradeButtons from "@/components/TradeButtons";
 import WatchButton from "@/components/WatchButton";
 import SentimentLabel from "@/components/SentimentLabel";
 import { ClaimTag, ProvenanceLine } from "@/components/Provenance";
@@ -80,8 +82,9 @@ export default async function StockPage({
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">
-              {company.name} <span className="text-ink-3">({company.symbol})</span>
+            <h1 className="flex items-center gap-3 text-2xl font-bold">
+              <CompanyLogo domain={company.domain} name={company.name} size={40} />
+              <span>{company.name} <span className="text-ink-3">({company.symbol})</span></span>
             </h1>
             <p className="mt-1 text-sm text-ink-2">
               {company.exchange} · {company.country} · {company.sector} · {company.industry}
@@ -106,8 +109,9 @@ export default async function StockPage({
             ) : (
               <p className="text-ink-3">Quotazione non disponibile</p>
             )}
-            <div className="mt-2 flex justify-end">
+            <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
               <WatchButton symbol={company.symbol} />
+              <TradeButtons symbol={company.symbol} etoroSlug={company.etoroSlug} />
             </div>
           </div>
         </div>

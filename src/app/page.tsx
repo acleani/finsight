@@ -1,10 +1,19 @@
 import Link from "next/link";
+import CompanyLogo from "@/components/CompanyLogo";
 import SearchBox from "@/components/SearchBox";
 import SentimentLabel from "@/components/SentimentLabel";
+import TradeButtons from "@/components/TradeButtons";
 import { ProvenanceLine } from "@/components/Provenance";
 import { fundamentals, marketData, news } from "@/lib/providers";
 import { trailingReturn } from "@/lib/indicators";
-import { fmtNum, fmtPct } from "@/lib/format";
+import { fmtBig, fmtNum, fmtPct } from "@/lib/format";
+
+function fmtTime(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? "—"
+    : d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
 
 export default async function HomePage() {
   const companies = await fundamentals().listCompanies();
@@ -75,38 +84,51 @@ export default async function HomePage() {
         <h2 className="mb-1 text-lg font-semibold">Panoramica del listino</h2>
         {rows[0]?.quote && <ProvenanceLine p={rows[0].quote.provenance} />}
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full min-w-[880px] text-sm">
             <thead>
-              <tr className="text-left text-xs text-ink-3">
-                <th className="pb-2 font-medium">Titolo</th>
-                <th className="pb-2 text-right font-medium">Prezzo</th>
-                <th className="pb-2 text-right font-medium">Var. giorno</th>
-                <th className="pb-2 text-right font-medium">1 mese</th>
-                <th className="pb-2 text-right font-medium">Settore</th>
+              <tr className="border-b border-grid text-left text-xs uppercase tracking-wide text-ink-3">
+                <th className="py-2 font-semibold">Titolo</th>
+                <th className="py-2 text-right font-semibold">Prezzo</th>
+                <th className="py-2 text-right font-semibold">Var%</th>
+                <th className="py-2 text-right font-semibold">1 mese</th>
+                <th className="py-2 text-right font-semibold">Volume</th>
+                <th className="py-2 text-right font-semibold">Mercato</th>
+                <th className="py-2 text-right font-semibold">Ora</th>
+                <th className="py-2 text-right font-semibold"></th>
               </tr>
             </thead>
             <tbody>
               {rows.map(({ company: c, quote, r1m }) => (
-                <tr key={c.symbol} className="border-t border-grid">
-                  <td className="py-2">
-                    <Link href={`/stocks/${c.symbol}`} className="font-medium hover:text-accent">
-                      {c.symbol}
+                <tr key={c.symbol} className="border-t border-grid hover:bg-surface-2/60">
+                  <td className="py-2.5">
+                    <Link href={`/stocks/${c.symbol}`} className="group flex items-center gap-2.5">
+                      <CompanyLogo domain={c.domain} name={c.name} />
+                      <span>
+                        <span className="block font-semibold leading-tight group-hover:text-accent">{c.name}</span>
+                        <span className="block text-xs text-ink-3">{c.symbol} · {c.sector}</span>
+                      </span>
                     </Link>
-                    <span className="ml-2 hidden text-ink-3 md:inline">{c.name}</span>
                   </td>
-                  <td className="tabular py-2 text-right">{fmtNum(quote!.price)} {c.currency}</td>
-                  <td className={`tabular py-2 text-right font-medium ${quote!.changePct >= 0 ? "text-good" : "text-bad"}`}>
+                  <td className="tabular py-2.5 text-right font-semibold">{fmtNum(quote!.price)} <span className="text-xs font-normal text-ink-3">{c.currency}</span></td>
+                  <td className={`tabular py-2.5 text-right font-semibold ${quote!.changePct >= 0 ? "text-good" : "text-bad"}`}>
                     {quote!.changePct >= 0 ? "▲" : "▼"} {fmtPct(quote!.changePct)}
                   </td>
-                  <td className={`tabular py-2 text-right ${r1m != null && r1m >= 0 ? "text-good" : "text-bad"}`}>
+                  <td className={`tabular py-2.5 text-right ${r1m != null && r1m >= 0 ? "text-good" : "text-bad"}`}>
                     {fmtPct(r1m)}
                   </td>
-                  <td className="py-2 text-right text-ink-2">{c.sector}</td>
+                  <td className="tabular py-2.5 text-right text-ink-2">{fmtBig(quote!.volume)}</td>
+                  <td className="py-2.5 text-right text-xs text-ink-2">{c.exchange}</td>
+                  <td className="tabular py-2.5 text-right text-xs text-ink-3">{fmtTime(quote!.provenance.retrievedAt)}</td>
+                  <td className="py-2.5 pl-3 text-right"><TradeButtons symbol={c.symbol} etoroSlug={c.etoroSlug} compact /></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-xs text-ink-3">
+          I pulsanti eToro/Fineco sono collegamenti esterni di comodo, non una raccomandazione:
+          leggi prima l&apos;analisi del titolo.
+        </p>
       </section>
 
       <div className="grid gap-5 md:grid-cols-3">

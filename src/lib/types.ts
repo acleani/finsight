@@ -31,6 +31,8 @@ export interface Company {
   description: string;
   peers: string[];         // symbols
   themes: string[];        // es. "ai", "semiconductors"
+  domain?: string;         // dominio ufficiale, usato per il logo (favicon)
+  etoroSlug?: string;      // slug della pagina pubblica eToro, se noto
 }
 
 export interface Quote {

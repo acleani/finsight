@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import CompanyLogo from "@/components/CompanyLogo";
+import TradeButtons from "@/components/TradeButtons";
 import { getWatchlist, setWatchlist } from "@/components/WatchButton";
 import { fmtNum, fmtPct } from "@/lib/format";
 import type { OverviewRow } from "@/app/api/overview/route";
@@ -56,16 +58,18 @@ export default function WatchlistPage() {
                 <th className="pb-2 text-right font-medium">12 mesi</th>
                 <th className="pb-2 text-right font-medium">Punteggio</th>
                 <th className="pb-2 text-right font-medium"></th>
+                <th className="pb-2 text-right font-medium"></th>
               </tr>
             </thead>
             <tbody>
               {items.map((r) => (
                 <tr key={r.company.symbol} className="border-t border-grid">
                   <td className="py-2">
-                    <Link href={`/stocks/${r.company.symbol}`} className="font-medium hover:text-accent">
-                      {r.company.symbol}
+                    <Link href={`/stocks/${r.company.symbol}`} className="group flex items-center gap-2.5">
+                      <CompanyLogo domain={r.company.domain} name={r.company.name} size={24} />
+                      <span className="font-medium group-hover:text-accent">{r.company.symbol}</span>
+                      <span className="hidden text-ink-3 md:inline">{r.company.name}</span>
                     </Link>
-                    <span className="ml-2 hidden text-ink-3 md:inline">{r.company.name}</span>
                   </td>
                   <td className="tabular py-2 text-right">
                     {r.quote ? `${fmtNum(r.quote.price)} ${r.company.currency}` : "n.d."}
@@ -80,10 +84,13 @@ export default function WatchlistPage() {
                   <td className="tabular py-2 text-right font-medium">
                     {r.scores.overall == null ? "n.d." : `${r.scores.overall}/100`}
                   </td>
+                  <td className="py-2 pl-3 text-right">
+                    <TradeButtons symbol={r.company.symbol} etoroSlug={r.company.etoroSlug} compact />
+                  </td>
                   <td className="py-2 text-right">
                     <button onClick={() => remove(r.company.symbol)}
                       className="text-xs text-ink-3 hover:text-bad" aria-label={`Rimuovi ${r.company.symbol}`}>
-                      ✕ rimuovi
+                      ✕
                     </button>
                   </td>
                 </tr>
