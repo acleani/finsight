@@ -19,6 +19,7 @@ export default function WatchButton({ symbol }: { symbol: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- idratazione client da localStorage dopo il mount (pattern SSR-safe)
     setWatched(getWatchlist().includes(symbol));
     setReady(true);
   }, [symbol]);

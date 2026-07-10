@@ -13,6 +13,7 @@ export default function WatchlistPage() {
   const [symbols, setSymbols] = useState<string[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- idratazione client da localStorage dopo il mount (pattern SSR-safe)
     setSymbols(getWatchlist());
     fetch("/api/overview")
       .then((r) => r.json())

@@ -13,7 +13,7 @@ import type {
   ScoreBreakdown, ScoreComponent,
 } from "./types";
 import {
-  annualizedReturn, annualizedVolatility, maxDrawdown, seriesCagr,
+  annualizedVolatility, maxDrawdown, seriesCagr,
   sma, trailingReturn,
 } from "./indicators";
 import { fmtNum, fmtPct } from "./format";

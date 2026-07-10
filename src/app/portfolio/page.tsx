@@ -75,7 +75,39 @@ export default function PortfolioPage() {
     const maxSector = [...bySector.entries()].sort((a, b) => b[1] - a[1])[0];
     const maxPosition = active.map(([sym, v]) => [sym, v / total] as const).sort((a, b) => b[1] - a[1])[0];
 
-    return { points, vol, maxDd: maxDd * 100, cagr, years, bySector: [...bySector.entries()], maxSector, maxPosition };
+    // correlazione media tra le posizioni (rendimenti settimanali sulle date comuni)
+    let avgCorr: number | null = null;
+    let maxPair: { a: string; b: string; c: number } | null = null;
+    if (active.length >= 2) {
+      const weeklyRets = new Map<string, number[]>();
+      for (const [sym] of active) {
+        const rets: number[] = [];
+        for (let i = 1; i < common.length; i++) {
+          rets.push(Math.log(priceAt.get(sym)!.get(common[i])! / priceAt.get(sym)!.get(common[i - 1])!));
+        }
+        weeklyRets.set(sym, rets);
+      }
+      const pearson = (x: number[], y: number[]) => {
+        const mx = x.reduce((a, b) => a + b, 0) / x.length;
+        const my = y.reduce((a, b) => a + b, 0) / y.length;
+        let num = 0, dx = 0, dy = 0;
+        for (let i = 0; i < x.length; i++) {
+          num += (x[i] - mx) * (y[i] - my); dx += (x[i] - mx) ** 2; dy += (y[i] - my) ** 2;
+        }
+        return dx && dy ? num / Math.sqrt(dx * dy) : 0;
+      };
+      let sum = 0, n = 0;
+      for (let i = 0; i < active.length; i++) {
+        for (let j = i + 1; j < active.length; j++) {
+          const c = pearson(weeklyRets.get(active[i][0])!, weeklyRets.get(active[j][0])!);
+          sum += c; n++;
+          if (!maxPair || c > maxPair.c) maxPair = { a: active[i][0], b: active[j][0], c };
+        }
+      }
+      avgCorr = n ? sum / n : null;
+    }
+
+    return { points, vol, maxDd: maxDd * 100, cagr, years, bySector: [...bySector.entries()], maxSector, maxPosition, avgCorr, maxPair };
   }, [data, weights, total]);
 
   if (!data) return <div className="card animate-pulse p-8 text-center text-ink-3">Caricamento serie storiche…</div>;
@@ -166,6 +198,27 @@ export default function PortfolioPage() {
               <p className="mt-1 text-sm text-warn">
                 ⚠ La singola posizione {sim.maxPosition[0]} pesa più del 40%.
               </p>
+            )}
+            {sim.avgCorr != null && (
+              <div className="mt-4 border-t border-grid pt-3 text-sm">
+                <p>
+                  Correlazione media tra le posizioni:{" "}
+                  <b className="tabular">{fmtNum(sim.avgCorr, 2)}</b>
+                  {sim.avgCorr >= 0.6 ? (
+                    <span className="text-warn"> — alta: il portafoglio si muove come un unico blocco, la diversificazione è debole.</span>
+                  ) : sim.avgCorr >= 0.35 ? (
+                    <span className="text-ink-2"> — moderata: diversificazione parziale.</span>
+                  ) : (
+                    <span className="text-good"> — bassa: buona diversificazione.</span>
+                  )}
+                </p>
+                {sim.maxPair && sim.maxPair.c >= 0.6 && (
+                  <p className="mt-1 text-xs text-ink-3">
+                    Coppia più correlata: {sim.maxPair.a} × {sim.maxPair.b} ({fmtNum(sim.maxPair.c, 2)}) —
+                    dettagli nella pagina <a href="/correlations" className="text-accent hover:underline">Correlazioni</a>.
+                  </p>
+                )}
+              </div>
             )}
           </section>
         </>

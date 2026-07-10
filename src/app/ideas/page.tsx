@@ -17,6 +17,7 @@ export default function IdeasPage() {
   const [profile, setProfile] = useState<InvestorProfile | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- idratazione client da localStorage dopo il mount (pattern SSR-safe)
     setProfile(loadProfile());
     fetch("/api/overview")
       .then((r) => r.json())

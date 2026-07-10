@@ -12,6 +12,7 @@ export default function SearchBox({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- idratazione client da localStorage dopo il mount (pattern SSR-safe)
     if (q.trim().length < 1) { setResults([]); setOpen(false); return; }
     const t = setTimeout(async () => {
       try {

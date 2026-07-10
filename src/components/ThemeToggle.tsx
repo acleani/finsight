@@ -8,6 +8,7 @@ export default function ThemeToggle() {
   useEffect(() => {
     const saved = localStorage.getItem("theme")
       ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- idratazione client da localStorage dopo il mount (pattern SSR-safe)
     setTheme(saved);
     document.documentElement.dataset.theme = saved;
   }, []);
