@@ -33,6 +33,16 @@ export interface Company {
   themes: string[];        // es. "ai", "semiconductors"
   domain?: string;         // dominio ufficiale, usato per il logo (favicon)
   etoroSlug?: string;      // slug della pagina pubblica eToro, se noto
+  listings: Listing[];     // tutte le sedi di quotazione note
+}
+
+/** Una sede di quotazione del titolo (listing primario, secondario o ADR/GDR). */
+export interface Listing {
+  market: string;          // es. "NASDAQ", "Borsa Italiana (GEM)"
+  ticker: string;          // simbolo su quel mercato
+  currency: string;
+  kind: "primaria" | "secondaria" | "ADR" | "GDR";
+  note?: string;
 }
 
 export interface Quote {

@@ -49,7 +49,11 @@ export default function SearchBox({ compact = false }: { compact?: boolean }) {
         }}
         placeholder={compact ? "Cerca titolo…" : "Cerca per nome, ticker o settore — es. Ferrari, NVDA, banche…"}
         aria-label="Cerca un titolo"
-        className={`w-full rounded-xl border border-bordr bg-surface px-3 text-ink outline-none placeholder:text-ink-3 focus:border-accent ${compact ? "py-1.5 text-sm" : "py-3"}`}
+        className={`w-full border border-bordr bg-surface text-ink outline-none placeholder:text-ink-3 focus:border-accent ${
+          compact
+            ? "rounded-xl px-3 py-1.5 text-sm"
+            : "rounded-full px-6 py-4 text-base shadow-[0_8px_30px_-12px_rgba(11,11,11,0.18)] focus:shadow-[0_8px_30px_-8px_rgba(42,120,214,0.25)]"
+        }`}
       />
       {open && results.length > 0 && (
         <ul className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-bordr bg-surface shadow-lg">

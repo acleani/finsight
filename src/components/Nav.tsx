@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Mercati" },
   { href: "/discover", label: "Scopri" },
   { href: "/compare", label: "Confronta" },
+  { href: "/correlations", label: "Correlazioni" },
   { href: "/watchlist", label: "Watchlist" },
   { href: "/news", label: "Notizie" },
   { href: "/ideas", label: "Idee per te" },

@@ -58,18 +58,19 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="pt-6 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Capire un&apos;azienda prima di investire
+      <section className="px-2 pb-6 pt-14 text-center md:pt-20">
+        <h1 className="hero-title mx-auto max-w-3xl">
+          Capire un&apos;azienda.<br />
+          <span className="hero-accent">Prima di investire.</span>
         </h1>
-        <p className="mx-auto mt-2 max-w-2xl text-ink-2">
-          Fondamentali, valutazione, rischi e punteggi spiegabili — con la provenienza
-          di ogni dato. Evidenza, non hype.
+        <p className="hero-sub mx-auto mt-5 max-w-2xl">
+          Fondamentali, valutazione, rischi e punteggi spiegabili —
+          con la provenienza di ogni dato. Evidenza, non hype.
         </p>
-        <div className="mx-auto mt-5 flex justify-center">
+        <div className="mx-auto mt-8 flex justify-center">
           <SearchBox />
         </div>
-        <div className="mt-3 flex flex-wrap justify-center gap-2 text-sm">
+        <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
           <span className="text-ink-3">Prova:</span>
           {["AAPL", "NVDA", "RACE.MI", "ENEL.MI", "ISP.MI"].map((s) => (
             <Link key={s} href={`/stocks/${s}`}

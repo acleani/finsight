@@ -8,6 +8,7 @@ import SentimentLabel from "@/components/SentimentLabel";
 import { ClaimTag, ProvenanceLine } from "@/components/Provenance";
 import { ScoreBar, ScoreDetail } from "@/components/ScorePanel";
 import { redFlags, scenarios, strengths, weaknesses, whyNow } from "@/lib/analysis";
+import { corrLabel, correlation, dailyReturnsByDate } from "@/lib/correlation";
 import {
   annualizedReturn, annualizedVolatility, maxDrawdown, positiveYearsPct,
   trailingReturn, ytdReturn,
@@ -39,6 +40,24 @@ export default async function StockPage({
 
   const bars = series?.bars ?? null;
   const scores = computeScores(f, bars);
+
+  // correlazioni con gli altri titoli coperti (rendimenti giornalieri, 12 mesi)
+  let correlations: { symbol: string; name: string; corr: number }[] = [];
+  if (bars) {
+    const mine = dailyReturnsByDate(bars);
+    const others = (await fp.listCompanies()).filter((c) => c.symbol !== symbol);
+    correlations = (
+      await Promise.all(
+        others.map(async (c) => {
+          const s = await md.getPriceSeries(c.symbol);
+          if (!s) return null;
+          const corr = correlation(mine, dailyReturnsByDate(s.bars));
+          return corr == null ? null : { symbol: c.symbol, name: c.name, corr };
+        }),
+      )
+    ).filter((x): x is { symbol: string; name: string; corr: number } => x != null)
+      .sort((a, b) => b.corr - a.corr);
+  }
   const pros = strengths(company, f, bars);
   const cons = weaknesses(company, f, bars);
   const flags = redFlags(company, f, bars);
@@ -116,6 +135,22 @@ export default async function StockPage({
           </div>
         </div>
         <p className="mt-3 max-w-3xl text-sm text-ink-2">{company.description}</p>
+        {company.listings.length > 0 && (
+          <div className="mt-4 border-t border-grid pt-3">
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-3">Dove è quotata</p>
+            <ul className="flex flex-wrap gap-2">
+              {company.listings.map((l) => (
+                <li key={l.market + l.ticker}
+                  className="rounded-full border border-bordr bg-surface-2 px-3 py-1 text-xs text-ink-2"
+                  title={l.note}>
+                  <b className="text-ink">{l.market}</b> · {l.ticker} · {l.currency}
+                  <span className="text-ink-3"> · {l.kind}</span>
+                  {l.note && <span className="text-ink-3"> — {l.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       {/* sintesi: punteggio + perché sì / cosa può andare storto */}
@@ -421,6 +456,44 @@ export default async function StockPage({
           </ul>
         )}
       </section>
+
+      {/* correlazioni */}
+      {correlations.length > 0 && (
+        <section className="card p-5">
+          <h2 className="mb-1 text-lg font-semibold">Correlazione con gli altri titoli <ClaimTag kind="CALCULATION" /></h2>
+          <p className="mb-3 text-sm text-ink-2">
+            Rendimenti giornalieri, ultimi 12 mesi. I titoli più correlati non aggiungono
+            diversificazione; quelli meno correlati riducono il rischio del portafoglio.
+          </p>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-bad">Si muove insieme a</h3>
+              <ul className="space-y-1.5 text-sm">
+                {correlations.slice(0, 3).map((c) => (
+                  <li key={c.symbol} className="flex items-center justify-between gap-2">
+                    <Link href={`/stocks/${c.symbol}`} className="hover:text-accent">{c.name}</Link>
+                    <span className="tabular font-semibold">{fmtNum(c.corr, 2)} <span className="font-normal text-ink-3">({corrLabel(c.corr)})</span></span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-accent">Diversifica con</h3>
+              <ul className="space-y-1.5 text-sm">
+                {correlations.slice(-3).reverse().map((c) => (
+                  <li key={c.symbol} className="flex items-center justify-between gap-2">
+                    <Link href={`/stocks/${c.symbol}`} className="hover:text-accent">{c.name}</Link>
+                    <span className="tabular font-semibold">{fmtNum(c.corr, 2)} <span className="font-normal text-ink-3">({corrLabel(c.corr)})</span></span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-ink-3">
+            Matrice completa e guida alla lettura in <Link href="/correlations" className="text-accent hover:underline">Correlazioni</Link>.
+          </p>
+        </section>
+      )}
 
       {/* peer */}
       {company.peers.length > 0 && (
