@@ -1,0 +1,12 @@
+# Deploy su Render.com (piano gratuito)
+services:
+  - type: web
+    name: finsight
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Per i dati reali (opzionale): aggiungi TWELVE_DATA_API_KEY dal dashboard
