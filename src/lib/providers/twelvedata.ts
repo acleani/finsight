@@ -7,11 +7,11 @@
  */
 
 import type { PriceBar, PriceSeries, Quote } from "../types";
-import type { MarketDataProvider } from "./types";
+import type { MarketDataProvider, SearchProvider, SearchResult } from "./types";
 
 const BASE = "https://api.twelvedata.com";
 
-export class TwelveDataProvider implements MarketDataProvider {
+export class TwelveDataProvider implements MarketDataProvider, SearchProvider {
   readonly name = "Twelve Data";
 
   constructor(private apiKey: string) {}
@@ -49,6 +49,25 @@ export class TwelveDataProvider implements MarketDataProvider {
         currency: d.currency,
       },
     };
+  }
+
+  /** Ricerca su tutto l'universo Twelve Data (azioni di qualsiasi borsa). */
+  async search(query: string): Promise<SearchResult[]> {
+    type R = {
+      data?: {
+        symbol: string; instrument_name: string; exchange: string;
+        country: string; currency: string; instrument_type: string;
+      }[];
+    };
+    const d = await this.call<R>("/symbol_search", { symbol: query, outputsize: "10" });
+    return (d?.data ?? []).map((it) => ({
+      symbol: it.symbol,
+      name: it.instrument_name || it.symbol,
+      exchange: it.exchange || "",
+      country: it.country || "",
+      currency: it.currency || "",
+      assetType: it.instrument_type || "Azione",
+    }));
   }
 
   async getPriceSeries(symbol: string): Promise<PriceSeries | null> {

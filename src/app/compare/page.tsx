@@ -26,15 +26,23 @@ export default async function ComparePage({
   const md = marketData();
   const all = await fp.listCompanies();
 
+  const noData: string[] = [];
   const cols = await Promise.all(
     symbols.map(async (symbol) => {
-      const [company, f, quote, series] = await Promise.all([
+      const [known, f, quote, series] = await Promise.all([
         fp.getCompany(symbol),
         fp.getFundamentals(symbol),
         md.getQuote(symbol),
         md.getPriceSeries(symbol),
       ]);
-      if (!company) return null;
+      // titolo fuori catalogo: confrontabile sulle metriche di prezzo se il
+      // provider di mercato lo conosce; i fondamentali restano "n.d."
+      const company = known ?? (quote || series ? {
+        symbol, name: symbol, exchange: "", country: "",
+        currency: quote?.provenance.currency ?? "", sector: "—", industry: "",
+        description: "", peers: [], themes: [], listings: [],
+      } : null);
+      if (!company) { noData.push(symbol); return null; }
       const bars = series?.bars ?? null;
       const scores = computeScores(f, bars);
       const fcf = f ? lastFcf(f) : null;
@@ -59,6 +67,14 @@ export default async function ComparePage({
       </header>
 
       <CompareForm all={all.map((c) => ({ symbol: c.symbol, name: c.name }))} selected={symbols} />
+
+      {noData.length > 0 && (
+        <p className="rounded-xl border border-warn/50 bg-surface-2 px-4 py-2 text-sm text-ink-2">
+          Nessun dato disponibile per: <b>{noData.join(", ")}</b>.
+          {" "}In modalità demo sono confrontabili solo i titoli del catalogo; con i dati reali
+          attivi verifica che il simbolo sia corretto (es. <code>TSLA</code>, <code>UCG.MI</code>).
+        </p>
+      )}
 
       {cols.length >= 2 ? (
         <section className="card overflow-x-auto p-5">
