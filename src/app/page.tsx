@@ -8,6 +8,16 @@ import { fundamentals, marketData, news } from "@/lib/providers";
 import { trailingReturn } from "@/lib/indicators";
 import { fmtBig, fmtNum, fmtPct } from "@/lib/format";
 
+const SHORT_NAMES: Record<string, string> = {
+  KO: "Coca-Cola", TSM: "TSMC", "005930.KS": "Samsung", JNJ: "J&J",
+  "ISP.MI": "Intesa Sanpaolo", "RACE.MI": "Ferrari", "ENEL.MI": "Enel",
+  GOOGL: "Google", AMZN: "Amazon",
+};
+
+function shortName(symbol: string, name: string): string {
+  return SHORT_NAMES[symbol] ?? name.split(" ")[0].replace(",", "");
+}
+
 function fmtTime(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
@@ -58,27 +68,60 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="px-2 pb-6 pt-14 text-center md:pt-20">
-        <h1 className="hero-title mx-auto max-w-3xl">
-          Capire un&apos;azienda.<br />
-          <span className="hero-accent">Prima di investire.</span>
-        </h1>
-        <p className="hero-sub mx-auto mt-5 max-w-2xl">
-          Fondamentali, valutazione, rischi e punteggi spiegabili —
-          con la provenienza di ogni dato. Evidenza, non hype.
-        </p>
-        <div className="mx-auto mt-8 flex justify-center">
-          <SearchBox />
+      <section className="relative px-2 pb-4 pt-14 text-center md:pt-20">
+        <div className="hero-bg" aria-hidden />
+        <div className="relative">
+          <h1 className="hero-title mx-auto max-w-3xl">
+            Capire un&apos;azienda.<br />
+            <span className="hero-accent">Prima di investire.</span>
+          </h1>
+          <p className="hero-sub mx-auto mt-5 max-w-2xl">
+            Fondamentali, valutazione, rischi e punteggi spiegabili —
+            con la provenienza di ogni dato. Evidenza, non hype.
+          </p>
+          <div className="mx-auto mt-8 flex justify-center">
+            <SearchBox />
+          </div>
+          <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-ink-3">
+            Oppure parti da un&apos;azienda che conosci
+          </p>
+          <div className="mx-auto mt-3 flex max-w-4xl flex-wrap justify-center gap-2.5">
+            {rows.map(({ company: c }) => (
+              <Link key={c.symbol} href={`/stocks/${c.symbol}`} className="logo-chip">
+                <CompanyLogo domain={c.domain} name={c.name} size={26} />
+                {shortName(c.symbol, c.name)}
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
-          <span className="text-ink-3">Prova:</span>
-          {["AAPL", "NVDA", "RACE.MI", "ENEL.MI", "ISP.MI"].map((s) => (
-            <Link key={s} href={`/stocks/${s}`}
-              className="rounded-full border border-bordr px-3 py-0.5 text-ink-2 hover:border-accent hover:text-ink">
-              {s}
-            </Link>
-          ))}
-        </div>
+      </section>
+
+      {/* come funziona: investire informati in 3 passi */}
+      <section className="grid gap-4 md:grid-cols-3">
+        {[
+          {
+            n: "1", color: "var(--accent)", title: "Cerca un'azienda",
+            text: "Per nome o ticker: Apple, Ferrari, Enel… In un secondo hai prezzo, storia e notizie.",
+            href: "/discover", cta: "o esplora le collezioni →",
+          },
+          {
+            n: "2", color: "var(--series-4)", title: "Leggi l'analisi in 1 minuto",
+            text: "Punteggio 0–100 spiegato voce per voce: perché è interessante, cosa può andare storto, quando conviene aspettare.",
+            href: "/stocks/NVDA", cta: "guarda un esempio →",
+          },
+          {
+            n: "3", color: "var(--series-2)", title: "Decidi con metodo",
+            text: "Confronta le alternative, controlla le correlazioni, simula il portafoglio e poi ordina dal tuo broker.",
+            href: "/compare", cta: "prova il confronto →",
+          },
+        ].map((s) => (
+          <Link key={s.n} href={s.href} className="card block p-6 text-left">
+            <span className="step-badge" style={{ background: s.color }}>{s.n}</span>
+            <h2 className="mt-4 text-lg font-semibold">{s.title}</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{s.text}</p>
+            <p className="mt-3 text-sm font-medium" style={{ color: s.color }}>{s.cta}</p>
+          </Link>
+        ))}
       </section>
 
       <section className="card p-5">

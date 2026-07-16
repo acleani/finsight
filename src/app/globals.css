@@ -113,6 +113,51 @@ a.card:hover {
   color: transparent;
 }
 
+/* sfondo hero: bagliori colorati sfumati */
+.hero-bg {
+  position: absolute;
+  inset: -40px 0 0;
+  pointer-events: none;
+  background:
+    radial-gradient(420px 260px at 18% 12%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(480px 300px at 84% 8%, color-mix(in srgb, var(--series-4) 14%, transparent), transparent 70%),
+    radial-gradient(380px 260px at 55% 92%, color-mix(in srgb, var(--series-2) 12%, transparent), transparent 70%);
+}
+
+/* fila di loghi cliccabili sotto la ricerca */
+.logo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  box-shadow: 0 1px 2px rgba(11,11,11,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.logo-chip:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: var(--accent);
+  color: var(--ink);
+  box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* passi "come funziona" */
+.step-badge {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+
 .tabular { font-variant-numeric: tabular-nums; }
 
 /* Etichette FATTO / CALCOLO / INTERPRETAZIONE */
